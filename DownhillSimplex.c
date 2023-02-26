@@ -12,7 +12,7 @@ double rosenbrock(Point vertex) {	//rosenbock parabolic valley function
 }
 
 void file_data(char *textfile, double xlow, double xhigh, int values) { //writing data into textfile
-
+									//for plot
     double x0 = xlow;
     double step = (xhigh - xlow) / (values - 1); 
     
