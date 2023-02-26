@@ -158,8 +158,8 @@ void algorithm(Point P[]) {	//loop containing algorithm
 
 int main() {
 	file_data("data.txt", -2., 2., 100);
-    
-    Point P[3] = {{0, 0}, {2, 0}, {0, 2}};	//initial positions
+	
+	Point P[3] = {{0, 0}, {2, 0}, {0, 2}};	//initial positions
 	algorithm(P);
 	return 0;
 }
