@@ -71,15 +71,15 @@ void reflect(Point* Ps, Point* Pbar, Point P[]) {
 
 void insideContract(Point* Pss, Point P[], Point* Pbar) {
     for (int i = 0; i < N; i++) {
-        Pss->x[i] = BETA * P[N].x[i] + (1 - BETA) * Pbar->x[i]; //this is used to reduce the size of the simplex
+        Pss->x[i] = BETA * P[N].x[i] + (1 - BETA) * Pbar->x[i]; //this reduces the size of the simplex
     }
 }
 
 void outsideContract(Point* Pss, Point* Ps, Point* Pbar) {
     for (int i = 0; i < N; i++) {
-        Pss->x[i] = BETA * Ps->x[i] + (1 - BETA) * Pbar->x[i];  //this can be used to help to move the simplex out of a 
-    }                                                           //narrow valley or a region with a high curvature
-}
+        Pss->x[i] = BETA * Ps->x[i] + (1 - BETA) * Pbar->x[i];  //this can be used to help to move the 
+    }                                                           //simplex out of a narrow valley or a 
+}                                                               //region with a high curvature
 
 void expand(Point* Pss, Point* Ps, Point* Pbar) {
     for (int i = 0; i < N; i++) {
@@ -90,7 +90,7 @@ void expand(Point* Pss, Point* Ps, Point* Pbar) {
 void shrink(Point P[]) {
     for (int i = 0; i < N + 1; i++) {
         for (int j = 0; j < N; j++) {
-            P[i].x[j] = P[0].x[j] + RHO * (P[i].x[j] - P[0].x[j]);  //shrinking simplex about the vertex Pl
+            P[i].x[j] = P[0].x[j] + RHO * (P[i].x[j] - P[0].x[j]);  //shrinking about the vertex Pl
         }
     }
 }
