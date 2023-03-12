@@ -69,10 +69,16 @@ void reflect(Point* Ps, Point* Pbar, Point P[]) {
     }
 }
 
-void contract(Point* Pss, Point P[], Point* Pbar) {
+void insideContract(Point* Pss, Point P[], Point* Pbar) {
     for (int i = 0; i < N; i++) {
-        Pss->x[i] = BETA * P[N].x[i] + (1 - BETA) * Pbar->x[i]; //contraction of centroid, denoted by P**
+        Pss->x[i] = BETA * P[N].x[i] + (1 - BETA) * Pbar->x[i]; //this is used to reduce the size of the simplex
     }
+}
+
+void outsideContract(Point* Pss, Point* Ps, Point* Pbar) {
+    for (int i = 0; i < N; i++) {
+        Pss->x[i] = BETA * Ps->x[i] + (1 - BETA) * Pbar->x[i];  //this can be used to help to move the simplex out of a 
+    }                                                           //narrow valley or a region with a high curvature
 }
 
 void expand(Point* Pss, Point* Ps, Point* Pbar) {
@@ -122,16 +128,16 @@ void simplex(Point P[]) {
 
         Ys = func(Ps);
 
-        if (Ys >= Y[0] && Ys <= Y[N - 1]) { //if y* >= yl and y* <= second worst vertex
+        if (Ys >= Y[0] && Ys < Y[N - 1]) {      //if y* >= yl and y* <= second worst vertex
             replacePoint(&P[N], &Ps);
         }
 
-        else if (Ys < Y[0]) {   //if y* < yl
+        else if (Ys < Y[0]) {           //if y* < yl
             expand(&Pss, &Ps, &Pbar);
             Yss = func(Pss);
 
-            if (Yss < Ys) {
-                replacePoint(&P[N], &Pss);  //if y** < y*
+            if (Yss < Ys) {                 //if y** < y*
+                replacePoint(&P[N], &Pss);
             }
 
             else {
@@ -139,23 +145,40 @@ void simplex(Point P[]) {
             }
         }
 
-        else if (Ys > Y[N - 1]) {   //if y* > second worst vertex
-            contract(&Pss, P, &Pbar);
-            Yss = func(Pss);
+        else {          //if y* >= second worst vertex
+            
+            if (Ys < Y[N]) {                        //if y* < yh
+                outsideContract(&Pss, &Ps, &Pbar);
+                Yss = func(Pss);
 
-            if (Yss < Y[N]) {
-                replacePoint(&P[N], &Pss);  //if y** < yh
+                if (Yss < Ys) {                 //if y** < y*
+                    replacePoint(&P[N], &Pss);
+                }
+                
+                else {
+                    shrink(P);
+                }
             }
 
-            else {
-                shrink(P);
+            else if (Ys >= Y[N]) {              //if y* >= yh
+                insideContract(&Pss, P, &Pbar);
+                Yss = func(Pss);
+
+                if (Yss < Y[N]) {               //if y** < yh
+                    replacePoint(&P[N], &Pss);
+                }
+
+                else {
+                    shrink(P);
+                }
             }
         }
-
+      
         if (MinCon(Y)) {
             break;
         }
     }
+
     printf("Final vertices:\n");
     for (int i = 0; i < N + 1; i++) {
         printf("(%lf, %lf)\n", P[i].x[0], P[i].x[1]);
