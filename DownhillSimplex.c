@@ -128,7 +128,7 @@ void simplex(Point P[]) {
 
         else if (Ys < Y[0]) {   //if y* < yl
             expand(&Pss, &Ps, &Pbar);
-            double Yss = func(Pss);
+            Yss = func(Pss);
 
             if (Yss < Ys) {
                 replacePoint(&P[N], &Pss);  //if y** < y*
@@ -141,7 +141,7 @@ void simplex(Point P[]) {
 
         else if (Ys > Y[N - 1]) {   //if y* > second worst vertex
             contract(&Pss, P, &Pbar);
-            double Yss = func(Pss);
+            Yss = func(Pss);
 
             if (Yss < Y[N]) {
                 replacePoint(&P[N], &Pss);  //if y** < yh
