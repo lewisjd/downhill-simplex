@@ -160,7 +160,7 @@ void simplex(Point P[]) {
                 }
             }
 
-            else if (Ys >= Y[N]) {              //if y* >= yh
+            else if {              //if y* >= yh
                 insideContract(&Pss, P, &Pbar);
                 Yss = func(Pss);
 
