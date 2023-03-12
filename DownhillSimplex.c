@@ -3,7 +3,7 @@
  * Candidate number: 24563                           *
  *                                                   *
  * Downhill Simplex algorithm for finding the        *
- * minimum of the rosenbrock function                *
+ * minimum of the Rosenbrock function                *
  *                                                   *
  * Starting vertices:                                *
  * p0 = (0,0), p1 = (2,0), p2 = (0,2)                *
@@ -33,7 +33,7 @@ typedef struct {
 } Point;
 
 double func(Point P) {
-    return 100 * pow(P.x[1] - pow(P.x[0], 2), 2) + pow(1 - P.x[0], 2);  //rosenbrock function
+    return 100 * pow(P.x[1] - pow(P.x[0], 2), 2) + pow(1 - P.x[0], 2);  //Rosenbrock function
 }
 
 void sortPoints(double Y[], Point P[]) {
