@@ -1,93 +1,99 @@
+/*****************************************************
+ *                                                   *
+ * Candidate number: 24563                           *
+ *                                                   *
+ * Downhill Simplex algorithm for finding the        *
+ * minimum of the rosenbrock function                *
+ *                                                   *
+ * Starting vertices:                                *
+ * p0 = (0,0), p1 = (2,0), p2 = (0,2)                *
+ *                                                   *
+ * This code can by amended for functions with more  *
+ * variables by changing N to the number of          *
+ * variables in the new function and the number of   *
+ * initial vertices to N + 1                         *
+ *                                                   *
+ *****************************************************/
+
 #include <stdio.h>
 #include <math.h>
-#include <string.h>
 
-#define N 2	//number of dimensions (best to match to number of variable inputs)
+#define N 2     //number of dimensions
+
 #define ALPHA 1.0
-#define BETA 0.5	//reflection, expansion and contraction coefficients
+#define BETA 0.5
 #define GAMMA 2.0
+#define RHO 0.5     //coefficients for reflection, contraction, expansion and shrinking
+
+#define TOL 1e-8
+#define MAX_ITER 1000   //standard deviation tolerance and maximum iterations
 
 typedef struct {
-    double x[N];  //array of variable inputs (x0, x1, ...)
+    double x[N];        //struct containing the coordinates of the vertices
 } Point;
 
-double rosenbrock(Point P) {    //rosenbrock function
-    return 100 * pow(P.x[1] - pow(P.x[0], 2), 2) + pow(1 - P.x[0], 2);
+double func(Point P) {
+    return 100 * pow(P.x[1] - pow(P.x[0], 2), 2) + pow(1 - P.x[0], 2);  //rosenbrock function
 }
 
-void file_data(char* textfile, double xlow, double xhigh, int values) { //writing data into textfile
-
-    double x0 = xlow;
-    double step = (xhigh - xlow) / (values - 1);
-
-    FILE* fp = fopen(textfile, "w");
-
-    for (int i = 0; i < 100; i++, x0 += step) {
-        Point P = { x0, 1 };
-        fprintf(fp, "%.3lf, %.3lf\n", x0, rosenbrock(P));
-    }
-
-    fclose(fp);
-}
-
-void sortPoints(double Y[], Point P[]) {	//reordering arrays from small to big
+void sortPoints(double Y[], Point P[]) {
     double temp;
     Point pTemp;
     for (int i = 0; i < N; i++) {
         for (int j = i + 1; j < N + 1; j++) {
             if (Y[i] > Y[j]) {
                 temp = Y[i];
-                Y[i] = Y[j];	//rearranging evaluations
+                Y[i] = Y[j];    //reordering outputs from smallest to largest
                 Y[j] = temp;
 
                 pTemp = P[i];
-                P[i] = P[j];	//rearranging corresponding vertices
+                P[i] = P[j];    //reordering the corresponding vertices
                 P[j] = pTemp;
             }
         }
     }
 }
 
-void centroid(Point P[], Point* Pbar) { //function to find centroid (average of all vertices except Ph)
+void centroid(Point P[], Point* Pbar) {
     for (int i = 0; i < N; i++) {
         Pbar->x[i] = 0;
         for (int j = 0; j < N; j++) {
-            Pbar->x[i] += P[j].x[i] / N;
+            Pbar->x[i] += P[j].x[i] / N;    //the centroid is the average of all vertices except Ph
         }
     }
 }
 
-void reflect(Point* Ps, Point* Pbar, Point P[]) {	//reflection of Ph, denoted by P*
+void reflect(Point* Ps, Point* Pbar, Point P[]) {
     for (int i = 0; i < N; i++) {
-        Ps->x[i] = (1 + ALPHA) * Pbar->x[i] - ALPHA * P[N].x[i];
+        Ps->x[i] = (1 + ALPHA) * Pbar->x[i] - ALPHA * P[N].x[i];    //reflection of Ph, denoted by P*
     }
 }
 
-void expand(Point* Pss, Point* Ps, Point* Pbar) {	//expansion of P*, denoted by P**
+void contract(Point* Pss, Point P[], Point* Pbar) {
     for (int i = 0; i < N; i++) {
-        Pss->x[i] = GAMMA * Ps->x[i] + (1 - GAMMA) * Pbar->x[i];
+        Pss->x[i] = BETA * P[N].x[i] + (1 - BETA) * Pbar->x[i]; //contraction of centroid, denoted by P**
     }
 }
 
-void contract(Point* Pss, Point P[], Point* Pbar) {	//contraction of the centroid in the direction of Ph, denoted by P**
+void expand(Point* Pss, Point* Ps, Point* Pbar) {
     for (int i = 0; i < N; i++) {
-        Pss->x[i] = BETA * P[N].x[i] + (1 - BETA) * Pbar->x[i];
+        Pss->x[i] = GAMMA * Ps->x[i] + (1 - GAMMA) * Pbar->x[i];    //expansion of P*, denoted by P**
     }
 }
 
-void replacePoint(Point* new, Point* orig) {	//replace Ph with P* or P**
-    memcpy(new, orig, sizeof(Point));
-}
-
-void replacePi(Point P[]) {	//replace all vertices with the midpoint of that vertex and Pl
+void shrink(Point P[]) {
     for (int i = 0; i < N + 1; i++) {
         for (int j = 0; j < N; j++) {
-            P[i].x[j] = (P[i].x[j] + P[0].x[j]) / 2;
+            P[i].x[j] = P[0].x[j] + RHO * (P[i].x[j] - P[0].x[j]);  //shrinking simplex about the vertex Pl
         }
     }
 }
 
-_Bool MinCon(double Y[]) {	//condition for breaking loop
+void replacePoint(Point* new, Point* orig) {
+    *new = *orig;                               //replacing Ph with P* or P**
+}
+
+_Bool MinCon(double Y[]) {
     double Ybar = 0, sum = 0;
     for (int i = 0; i < N + 1; i++) {
         Ybar += Y[i] / (N + 1);
@@ -95,67 +101,58 @@ _Bool MinCon(double Y[]) {	//condition for breaking loop
     for (int i = 0; i < N + 1; i++) {
         sum += pow(Y[i] - Ybar, 2) / N;
     }
-    return (sqrt(sum) < pow(10, -8));
+    return (sqrt(sum) < TOL);   //condition for breaking loop containing simplex method
 }
 
-void algorithm(Point P[]) {	//loop containing algorithm
-    int a;
-    for (a = 0; a < 1000; a++) {	//stops after 1000 iterations
+void simplex(Point P[]) {
+    Point Pbar, Ps, Pss;
+    double Ys, Yss, Y[N + 1];
+    
+    int a;  //iterations
+    
+    for (a = 0; a < MAX_ITER; a++) {
 
-        double Y[N + 1];
         for (int i = 0; i < N + 1; i++) {
-            Y[i] = rosenbrock(P[i]);	//positions evaluated
+            Y[i] = func(P[i]);              //initialising function outputs
         }
 
-        sortPoints(Y, P);	//sort values and positions small to big
+        sortPoints(Y, P);
+        centroid(P, &Pbar);
+        reflect(&Ps, &Pbar, P);
 
-        Point Pbar, Ps, Pss;
+        Ys = func(Ps);
 
-        centroid(P, &Pbar);	//centroid calculation
-        reflect(&Ps, &Pbar, P);	//P* calculation
+        if (Ys >= Y[0] && Ys <= Y[N - 1]) { //if y* >= yl and y* <= second worst vertex
+            replacePoint(&P[N], &Ps);
+        }
 
-        double Ys = rosenbrock(Ps);	//y* evaluation
-
-        if (Ys < Y[0]) {
-
-            expand(&Pss, &Ps, &Pbar);	//P** expansion
-            double Yss = rosenbrock(Pss);	//y** evaluation
+        else if (Ys < Y[0]) {   //if y* < yl
+            expand(&Pss, &Ps, &Pbar);
+            double Yss = func(Pss);
 
             if (Yss < Ys) {
-                replacePoint(&P[2], &Pss);	//replace Ph with P**
+                replacePoint(&P[N], &Pss);  //if y** < y*
             }
 
             else {
-                replacePoint(&P[2], &Ps);	//replace Ph with P*
+                replacePoint(&P[N], &Ps);
             }
         }
 
-        else {
-            for (int i = 1; i < N; i++) {
-                if (Ys >= Y[i]) {
+        else if (Ys > Y[N - 1]) {   //if y* > second worst vertex
+            contract(&Pss, P, &Pbar);
+            double Yss = func(Pss);
 
-                    if (Ys < Y[2]) {
-                        replacePoint(&P[2], &Ps);	//replace Ph with P*
-                    }
-                    contract(&Pss, P, &Pbar);	//P** contraction
-                    double Yss = rosenbrock(Pss);	//y** evaluation
+            if (Yss < Y[N]) {
+                replacePoint(&P[N], &Pss);  //if y** < yh
+            }
 
-                    if (Yss < Y[2]) {
-                        replacePoint(&P[2], &Pss);	//replace Ph with P**
-                    }
-
-                    else {
-                        replacePi(P);	//replace Pi with (Pi+Pl)/2
-                    }
-                }
-
-                else {
-                    replacePoint(&P[2], &Ps);	//replace Ph with P*
-                }
+            else {
+                shrink(P);
             }
         }
 
-        if (MinCon(Y)) {	//condition for breaking loop
+        if (MinCon(Y)) {
             break;
         }
     }
@@ -166,16 +163,14 @@ void algorithm(Point P[]) {	//loop containing algorithm
 
     printf("\nEvaluations:\n");
     for (int i = 0; i < N + 1; i++) {
-        printf("%lf\n", rosenbrock(P[i]));
+        printf("%lf\n", func(P[i]));
     }
 
-    printf("\nIterations: %d\n", a);
+    printf("\nIterations: %d\n", a + 1);
 }
 
 int main() {
-    file_data("data.txt", -2., 2., 100);
-
-    Point P[N + 1] = { {0, 0}, {2, 0}, {0, 2} };	//initial vertices
-    algorithm(P);
+    Point P[N + 1] = { {0, 0}, {2, 0}, {0, 2} };    //initial vertices (each vertex has N variables)
+    simplex(P);
     return 0;
 }
