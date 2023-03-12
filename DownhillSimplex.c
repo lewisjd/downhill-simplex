@@ -107,7 +107,7 @@ _Bool MinCon(double Y[]) {
     for (int i = 0; i < N + 1; i++) {
         sum += pow(Y[i] - Ybar, 2) / N;
     }
-    return (sqrt(sum) < TOL);   //condition for breaking loop containing simplex method
+    return (sqrt(sum) < TOL);   //condition for breaking the loop containing the simplex method
 }
 
 void simplex(Point P[]) {
