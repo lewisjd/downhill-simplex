@@ -58,40 +58,40 @@ void centroid(Point P[], Point* Pbar) {
     for (int i = 0; i < N; i++) {
         Pbar->x[i] = 0;
         for (int j = 0; j < N; j++) {
-            Pbar->x[i] += P[j].x[i] / N;    //the centroid is the average of all vertices except Ph
-        }
+            Pbar->x[i] += P[j].x[i] / N;    //the centroid is the average of all vertices except 
+        }                                   //Ph (worst vertex), denoted by Pbar
     }
 }
 
 void reflect(Point* Ps, Point* Pbar, Point P[]) {
     for (int i = 0; i < N; i++) {
-        Ps->x[i] = (1 + ALPHA) * Pbar->x[i] - ALPHA * P[N].x[i];    //reflection of Ph, denoted by P*
-    }
+        Ps->x[i] = Pbar->x[i] + ALPHA * (Pbar->x[i] - P[N].x[i]);   //expansion of Pbar away from 
+    }                                                               //Ph, denoted by P*
 }
 
 void insideContract(Point* Pss, Point P[], Point* Pbar) {
     for (int i = 0; i < N; i++) {
-        Pss->x[i] = BETA * P[N].x[i] + (1 - BETA) * Pbar->x[i]; //this reduces the size of the simplex
-    }
+        Pss->x[i] = Pbar->x[i] + BETA * (P[N].x[i] - Pbar->x[i]);   //contraction of Ph towards 
+    }                                                               //Pbar, denoted by P**
 }
 
 void outsideContract(Point* Pss, Point* Ps, Point* Pbar) {
     for (int i = 0; i < N; i++) {
-        Pss->x[i] = BETA * Ps->x[i] + (1 - BETA) * Pbar->x[i];  //this can be used to help to move the 
-    }                                                           //simplex out of a narrow valley or a 
-}                                                               //region with a high curvature
+        Pss->x[i] = Pbar->x[i] + BETA * (Ps->x[i] - Pbar->x[i]);    //contraction of Ps towards
+    }                                                               //Pbar, denoted by P**
+}
 
 void expand(Point* Pss, Point* Ps, Point* Pbar) {
     for (int i = 0; i < N; i++) {
-        Pss->x[i] = GAMMA * Ps->x[i] + (1 - GAMMA) * Pbar->x[i];    //expansion of P*, denoted by P**
-    }
+        Pss->x[i] = Pbar->x[i] + GAMMA * (Ps->x[i] - Pbar->x[i]);   //expansion of Ps away from
+    }                                                               //Pbar, denoted by P**
 }
 
 void shrink(Point P[]) {
     for (int i = 0; i < N + 1; i++) {
         for (int j = 0; j < N; j++) {
-            P[i].x[j] = P[0].x[j] + RHO * (P[i].x[j] - P[0].x[j]);  //shrinking about the vertex Pl
-        }
+            P[i].x[j] = P[0].x[j] + RHO * (P[i].x[j] - P[0].x[j]);  //contraction of every point
+        }                                                           //towards Pl (best vertex)
     }
 }
 
@@ -129,7 +129,7 @@ void simplex(Point P[]) {
         Ys = func(Ps);
 
         if (Ys >= Y[0] && Ys < Y[N - 1]) {      //if y* >= yl and y* <= second worst vertex
-            replacePoint(&P[N], &Ps);
+            replacePoint(&P[N], &Ps);       //replacing Ph with P*
         }
 
         else if (Ys < Y[0]) {           //if y* < yl
@@ -141,7 +141,7 @@ void simplex(Point P[]) {
             }
 
             else {
-                replacePoint(&P[N], &Ps);
+                replacePoint(&P[N], &Ps);   //replacing Ph with P*
             }
         }
 
@@ -152,7 +152,7 @@ void simplex(Point P[]) {
                 Yss = func(Pss);
 
                 if (Yss < Ys) {                 //if y** < y*
-                    replacePoint(&P[N], &Pss);
+                    replacePoint(&P[N], &Pss);      //replacing Ph with P**
                 }
                 
                 else {
@@ -165,7 +165,7 @@ void simplex(Point P[]) {
                 Yss = func(Pss);
 
                 if (Yss < Y[N]) {               //if y** < yh
-                    replacePoint(&P[N], &Pss);
+                    replacePoint(&P[N], &Pss);      //replacing Ph with P**
                 }
 
                 else {
@@ -193,7 +193,7 @@ void simplex(Point P[]) {
 }
 
 int main() {
-    Point P[N + 1] = { {0, 0}, {2, 0}, {0, 2} };    //initial vertices (each vertex has N variables)
+    Point P[N + 1] = { {0, 0}, {2, 0}, {0, 2} };    //initial vertices (each vertex has N coordinates)
     simplex(P);
     return 0;
 }
