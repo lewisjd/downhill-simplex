@@ -8,7 +8,7 @@
  * Starting vertices:                                *
  * p0 = (0,0), p1 = (2,0), p2 = (0,2)                *
  *                                                   *
- * This code can by amended for functions with more  *
+ * This code can be amended for functions with more  *
  * variables by changing N to the number of          *
  * variables in the new function and the number of   *
  * initial vertices to N + 1                         *
