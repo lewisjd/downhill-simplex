@@ -137,7 +137,7 @@ void simplex(Point P[]) {
             Yss = func(Pss);
 
             if (Yss < Ys) {                 //if y** < y*
-                replacePoint(&P[N], &Pss);
+                replacePoint(&P[N], &Pss);  //replacing Ph with P**
             }
 
             else {
