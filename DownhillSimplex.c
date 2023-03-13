@@ -77,13 +77,13 @@ void insideContract(Point* Pss, Point P[], Point* Pbar) {
 
 void outsideContract(Point* Pss, Point* Ps, Point* Pbar) {
     for (int i = 0; i < N; i++) {
-        Pss->x[i] = Pbar->x[i] + BETA * (Ps->x[i] - Pbar->x[i]);    //contraction of Ps towards
+        Pss->x[i] = Pbar->x[i] + BETA * (Ps->x[i] - Pbar->x[i]);    //contraction of P* towards
     }                                                               //Pbar, denoted by P**
 }
 
 void expand(Point* Pss, Point* Ps, Point* Pbar) {
     for (int i = 0; i < N; i++) {
-        Pss->x[i] = Pbar->x[i] + GAMMA * (Ps->x[i] - Pbar->x[i]);   //expansion of Ps away from
+        Pss->x[i] = Pbar->x[i] + GAMMA * (Ps->x[i] - Pbar->x[i]);   //expansion of P* away from
     }                                                               //Pbar, denoted by P**
 }
 
